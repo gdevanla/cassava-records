@@ -17,14 +17,16 @@ import Data.Attoparsec.ByteString as P
 import Data.String
 import Text.Read
 import Data.Char
+import GHC.Generics (Generic)
+import Data.Text as DT
 
-makeField:: String -> Name -> String -> (Name, Bang, Type)
+makeField:: String -> Type -> String -> (Name, Bang, Type)
 makeField fname ftype suffix = (
-  mkName (suffix ++ fname), defaultBang , ConT ftype)
+  mkName ("_" ++ fname), defaultBang , ftype)
   where
   defaultBang = Bang NoSourceUnpackedness NoSourceStrictness
 
-makeFields:: V.Vector (String, Name) -> String -> V.Vector (Name, Bang, Type)
+makeFields:: V.Vector (String, Type) -> String -> V.Vector (Name, Bang, Type)
 makeFields fnames_types suffix = V.map makeField' fnames_types
   where
     makeField' = (\(f, t) -> makeField f t suffix)
@@ -33,7 +35,7 @@ makeRecord :: String -> [(Name, Bang, Type)] -> DecsQ
 makeRecord record_name fields = do
   let record_name' =  mkName record_name
       recc = RecC (record_name') fields
-      deriv =  [DerivClause Nothing [ConT ''Show]]
+      deriv =  [DerivClause Nothing [ConT ''Show, ConT ''Generic]]
       r = DataD [] (record_name') [] Nothing [recc] deriv
   return [r]
 
@@ -44,7 +46,7 @@ createRecords csvData options =
       Right f -> f
       Left f -> fail  $ "unable to parse" ++ f
 
-inferColumnType :: BL.ByteString -> V.Vector String -> (String, Name)
+inferColumnType :: BL.ByteString -> V.Vector String -> (String, Type)
 inferColumnType header column = (BC.unpack header, inferMajorityType column)
 
 isInteger s = case reads s :: [(Integer, String)] of
@@ -79,20 +81,28 @@ isNumeric s = isInteger s || isDouble s
 
 data Empty = Empty
 
+--mayBeDouble = AppT (ConT ''Maybe) (ConT ''Double)
+
+maybeType ftype = AppT (ConT ''Maybe) (ConT ftype)
+
 inferMajorityType column =
   majority_types types'
   where
     types = V.map find_types column
     types' = V.filter (\t -> t /= ''Empty) types
+    non_types' = V.filter (\t -> t == ''Empty) types
     find_types c
       | isNumeric c = ''Double
 --      | isBool c  = ''Bool
       | c == "" = ''Empty
       | otherwise = ''String
     majority_types t1
-      | V.all (\t -> t == ''Double) t1 = ''Double
-      | V.all (\t -> t == ''Bool) t1 = ''Bool
-      | otherwise = ''String
+      | (V.all (\t -> t == ''Double) t1) && V.length non_types' > 0 = maybeType ''Double
+      | V.all (\t -> t == ''Double) t1 = ConT ''Double
+      | (V.all (\t -> t == ''Bool) t1) && V.length non_types' > 0 = maybeType ''Bool
+      | V.all (\t -> t == ''Bool) t1 = ConT ''Bool
+      | V.length non_types' > 0 = maybeType ''String
+      | otherwise = ConT ''String
 
 
 collectColumns :: BL.ByteString -> V.Vector NamedRecord -> V.Vector String
