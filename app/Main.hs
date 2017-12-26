@@ -9,11 +9,11 @@ import Data.Csv
 import qualified Data.ByteString.Lazy as BL
 import Data.Vector as V
 import Data.Text as DT
-import Control.Lens hiding (element)
+-- import Control.Lens hiding (element)
 
 -- $(makeCsvRecord "Salaries" "salaries.csv" "_" commaOptions)
 
-$(makeCsvRecord "Sec" "SEC_20170802.csv" "_" commaOptions)
+-- $(makeCsvRecord "Sec" "SEC_20170802.csv" "_" commaOptions)
 
 -- $(makeCsvRecord "NewR" "SEC_20170802_10.txt" "_tsv" tabOptions)
 
@@ -46,16 +46,16 @@ myOptions2 = defaultOptions { fieldLabelModifier = rmUnderscore }
 --   headerOrder = genericHeaderOrder myOptions2
 
 
-instance ToNamedRecord Sec where
-  toNamedRecord = genericToNamedRecord myOptions
+-- instance ToNamedRecord Sec where
+--   toNamedRecord = genericToNamedRecord myOptions
 
-instance FromNamedRecord Sec where
-  parseNamedRecord = genericParseNamedRecord myOptions
+-- instance FromNamedRecord Sec where
+--   parseNamedRecord = genericParseNamedRecord myOptions
 
-instance DefaultOrdered Sec where
-  headerOrder = genericHeaderOrder myOptions
+-- instance DefaultOrdered Sec where
+--   headerOrder = genericHeaderOrder myOptions
 
-makeLenses ''Sec
+-- makeLenses ''Sec
 
 -- makeLenses ''Salaries
 
@@ -71,14 +71,17 @@ makeLenses ''Sec
 --     Left err -> fail ("Failed to load" Prelude.++ err)
 --     Right (_, v::V.Vector Salaries) -> return v
 
-loadData fname = do
-  csvData <- BL.readFile fname
-  case decodeByName csvData of
-    Left err -> fail ("Failed to load" Prelude.++ err)
-    Right (_, v::V.Vector Sec) -> return v
+-- loadData fname = do
+--   csvData <- BL.readFile fname
+--   case decodeByName csvData of
+--     Left err -> fail ("Failed to load" Prelude.++ err)
+--     Right (_, v::V.Vector Sec) -> return v
 
 
-main :: IO ()
-main = do
-  v <- loadData "SEC_20170802_10.csv"
-  putStrLn . show $ v
+-- main :: IO ()
+-- main = do
+--   v <- loadData "SEC_20170802_10.csv"
+--   putStrLn . show $ v
+
+main:: IO ()
+main = putStrLn ""
