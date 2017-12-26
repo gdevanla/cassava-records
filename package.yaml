@@ -1,9 +1,9 @@
 name:                cassava-records
 version:             0.1.0.0
-github:              "githubuser/cassava-records"
+github:              "gdevanla/cassava-records"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
+author:              "Guru Devanla"
+maintainer:          "grdvnl@gmail.com"
 copyright:           "2017 Author name here"
 
 extra-source-files:
@@ -11,7 +11,7 @@ extra-source-files:
 - ChangeLog.md
 
 # Metadata used when publishing your package
-synopsis:            Short description of your package
+synopsis:            Auto-generation of records data type using the data in the provided csv or tab separated file.
 # category:            Web
 
 # To avoid duplicated efforts in documentation and dealing with the
@@ -44,6 +44,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - cassava-records
+    - lens
 
 tests:
   cassava-records-test:

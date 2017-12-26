@@ -1,10 +1,9 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- TODO
--- support Bool, DateTime, Scientific
--- Instances for ToNamedRecord, FromNamedRecord, DefaultOrdered
--- accept options for instance creation
+-- Documentation
+-- Cleanup import creation
+--
 
 module Data.Cassava.Records where
 
