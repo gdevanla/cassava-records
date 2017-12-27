@@ -11,6 +11,7 @@ import Control.Monad
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import qualified Data.ByteString as BL
+import qualified Data.ByteString.Lazy as BLZ
 import qualified Data.ByteString.Char8 as BC
 import Data.Csv.Parser as CP
 import qualified Data.Csv as Csv
@@ -149,9 +150,33 @@ tabOptions = defaultDecodeOptions {
 commaOptions :: DecodeOptions
 commaOptions = defaultDecodeOptions
 
+defaultFieldNameOptions :: Options
+defaultFieldNameOptions = defaultOptions { fieldLabelModifier = rmUnderscore }
+  where
+    rmUnderscore ('_':str) = DT.unpack . DT.pack $ str
+    rmUnderscore str = str
+
+
+makeInstance :: String -> DecsQ
+makeInstance recordName = [d|
+   instance ToNamedRecord $(conT (mkName recordName)) where
+        toNamedRecord = genericToNamedRecord $ defaultFieldNameOptions
+   instance FromNamedRecord $(conT (mkName recordName)) where
+        parseNamedRecord = genericParseNamedRecord $ defaultFieldNameOptions
+   instance DefaultOrdered $(conT (mkName recordName)) where
+        headerOrder = genericHeaderOrder $ defaultFieldNameOptions
+   |]
+
 makeCsvRecord ::
   String -> FilePath -> String -> DecodeOptions -> Q [Dec]
 makeCsvRecord recordName fileName prefix decodeOptions = do
   csvData <- runIO $ BL.readFile fileName
   let (headers, named_records) = createRecords csvData decodeOptions
   makeRecord recordName (V.toList $ inferTypes headers named_records prefix)
+
+
+loadData fname = do
+  csvData <- BLZ.readFile fname
+  case decodeByName csvData of
+    Left err -> fail ("Faled to load" Prelude.++ err)
+    Right (_, v) -> return v

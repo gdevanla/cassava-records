@@ -12,6 +12,7 @@ import Data.Text as DT
 -- import Control.Lens hiding (element)
 
 -- $(makeCsvRecord "Salaries" "salaries.csv" "_" commaOptions)
+-- $(makeInstance "Salaries")
 
 -- $(makeCsvRecord "Sec" "SEC_20170802.csv" "_" commaOptions)
 
