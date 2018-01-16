@@ -1,6 +1,7 @@
 {-#LANGUAGE TemplateHaskell#-}
 {-#LANGUAGE DeriveGeneric #-}
 {-#LANGUAGE ScopedTypeVariables #-}
+{-#LANGUAGE DuplicateRecordFields #-}
 
 module Main where
 
@@ -11,10 +12,10 @@ import Data.Vector as V
 import Data.Text as DT
 -- import Control.Lens hiding (element)
 
--- $(makeCsvRecord "Salaries" "salaries.csv" "_" commaOptions)
+$(makeCsvRecord "Salaries" "salaries.csv" "_" commaOptions)
 -- $(makeInstance "Salaries")
 
--- $(makeCsvRecord "Sec" "SEC_20170802.csv" "_" commaOptions)
+$(makeCsvRecord "Sec" "SEC_20170802.csv" "_" commaOptions)
 
 -- $(makeCsvRecord "NewR" "SEC_20170802_10.txt" "_tsv" tabOptions)
 

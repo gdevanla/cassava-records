@@ -5,7 +5,12 @@
 -- Cleanup import creation
 --
 
-module Data.Cassava.Records where
+module Data.Cassava.Records
+  (
+    makeCsvRecord
+  , commaOptions
+  )
+where
 
 import Control.Monad
 import Language.Haskell.TH
@@ -87,24 +92,7 @@ instance FromField Bool where
     if s' == "t" || s' == "True" then return True
       else return False
 
-
--- data Person = Person { name :: !Text, age :: !Int }
-
--- instance FromNamedRecord Person where
---   parseNamedRecord m = Person <$>
---                        m .: "name" <*>
---                        m .: "age"
-
--- instance FromNamedRecord X where
---   parseNamedRecord m = _
-
--- class CRecords a where
---   parseCField :: Field -> Parse a
---   parseCField f = parseField f
-
 data Empty = Empty
-
---mayBeDouble = AppT (ConT ''Maybe) (ConT ''Double)
 
 maybeType ftype = AppT (ConT ''Maybe) (ConT ftype)
 
@@ -145,7 +133,6 @@ tabOptions :: DecodeOptions
 tabOptions = defaultDecodeOptions {
   decDelimiter = fromIntegral (DC.ord '\t')
   }
-
 
 commaOptions :: DecodeOptions
 commaOptions = defaultDecodeOptions
