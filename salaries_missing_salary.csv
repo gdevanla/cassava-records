@@ -1,0 +1,10 @@
+name,salary,status
+John Doe,1010101,True
+Jill Jill,10101.1,False
+John Doe1,1010101,T
+Jill Jill1,10101.1,F
+John1 Doe,1010101,true
+Jill1 Jill,10101.1,false
+John2 Doe1,1010101,t
+Jill2 Jill1,10101.1,f
+No Salary,,TRUE
