@@ -33,13 +33,15 @@ a ```Record``` data type using ```Template Haskell```.
 
 Using data/salaries.csv
 
+```
 NAME,SALARY,STATUS
 John Doe,100.0,True
-Jill Doe, 200.10,False
+Jill Doe,200.10,False
 John Doe Sr,101.0,T
-Jill Doe Sr, 10101.10,f
+Jill Doe Sr,10101.10,f
 John Doe Jr,1010101.0,true
-Jill Doe Jr, 10101.10,false
+Jill Doe Jr,10101.10,false
+```
 
 ``` haskell
 
