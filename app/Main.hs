@@ -12,11 +12,10 @@ import Data.Vector as V
 import Data.Text as DT
 -- import Control.Lens hiding (element)
 
-$(makeCsvRecord "Salaries" "salaries.csv" "_" commaOptions)
+$(makeCsvRecord "Salaries" "data/salaries.csv" "_" commaOptions)
 -- $(makeInstance "Salaries")
 
-$(makeCsvRecord "Sec" "SEC_20170802.csv" "_" commaOptions)
-
+-- $(makeCsvRecord "Sec" "SEC_20170802.csv" "_" commaOptions)
 -- $(makeCsvRecord "NewR" "SEC_20170802_10.txt" "_tsv" tabOptions)
 
 -- $(makeCsvRecord "NewR" "SEC_20170802_10.csv" "_csv" commaOptions)
@@ -33,16 +32,16 @@ myOptions2 = defaultOptions { fieldLabelModifier = rmUnderscore }
     rmUnderscore ('_':str) = DT.unpack . DT.pack $ str
     rmUnderscore str = str
 
--- instance ToNamedRecord NewR where
---   toNamedRecord = genericToNamedRecord myOptions
+instance ToNamedRecord Salaries where
+  toNamedRecord = genericToNamedRecord myOptions
 
 -- $(makeNamedInstances ''NewR)
 
 -- instance ToNamedRecord Salaries where
 --   toNamedRecord = genericToNamedRecord myOptions2
 
--- instance FromNamedRecord Salaries where
---   parseNamedRecord = genericParseNamedRecord myOptions2
+instance FromNamedRecord Salaries where
+  parseNamedRecord = genericParseNamedRecord myOptions
 
 -- instance DefaultOrdered Salaries where
 --   headerOrder = genericHeaderOrder myOptions2
@@ -67,11 +66,11 @@ myOptions2 = defaultOptions { fieldLabelModifier = rmUnderscore }
 --     Left err -> fail ("Failed to load" Prelude.++ err)
 --     Right (_, v::V.Vector NewR) -> return v
 
--- loadData fname = do
---   csvData <- BL.readFile fname
---   case decodeByName csvData of
---     Left err -> fail ("Failed to load" Prelude.++ err)
---     Right (_, v::V.Vector Salaries) -> return v
+loadData fname = do
+  csvData <- BL.readFile fname
+  case decodeByName csvData of
+    Left err -> fail ("Failed to load" Prelude.++ err)
+    Right (_, v::V.Vector Salaries) -> return v
 
 -- loadData fname = do
 --   csvData <- BL.readFile fname
@@ -80,10 +79,11 @@ myOptions2 = defaultOptions { fieldLabelModifier = rmUnderscore }
 --     Right (_, v::V.Vector Sec) -> return v
 
 
--- main :: IO ()
--- main = do
---   v <- loadData "SEC_20170802_10.csv"
---   putStrLn . show $ v
+main :: IO ()
+main = do
+  -- v <- loadData "SEC_20170802_10.csv"
+  v <- loadData "data/salaries.csv"
+  putStrLn . show $ v
 
-main:: IO ()
-main = putStrLn ""
+-- main:: IO ()
+-- main = putStrLn ""
