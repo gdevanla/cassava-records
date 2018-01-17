@@ -45,6 +45,14 @@ instance ToNamedRecord Salaries where
 instance FromNamedRecord Salaries where
   parseNamedRecord = genericParseNamedRecord myOptions
 
+-- instance T.CellValueFormatter Text where
+--   ppFormatter t = DT.unpack t
+--   ppFormatterWithStyle f t = DT.unpack t
+
+instance T.CellValueFormatter DT.Text
+
+instance T.Tabulate Salaries
+
 
 -- instance DefaultOrdered Salaries where
 --   headerOrder = genericHeaderOrder myOptions2
