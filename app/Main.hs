@@ -2,6 +2,7 @@
 {-#LANGUAGE DeriveGeneric #-}
 {-#LANGUAGE ScopedTypeVariables #-}
 {-#LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 
 module Main where
 
@@ -10,6 +11,7 @@ import Data.Csv
 import qualified Data.ByteString.Lazy as BL
 import Data.Vector as V
 import Data.Text as DT
+import qualified Text.PrettyPrint.Tabulate as T
 -- import Control.Lens hiding (element)
 
 $(makeCsvRecord "Salaries" "data/salaries.csv" "_" commaOptions)
@@ -42,6 +44,7 @@ instance ToNamedRecord Salaries where
 
 instance FromNamedRecord Salaries where
   parseNamedRecord = genericParseNamedRecord myOptions
+
 
 -- instance DefaultOrdered Salaries where
 --   headerOrder = genericHeaderOrder myOptions2

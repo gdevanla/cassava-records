@@ -1,11 +1,9 @@
 # cassava-records
-==================
 
 A library extension for Cassava (Haskell CSV parser library) that
 automatically creates a Record given the csv file.
 
-What is this tool for?
-========================
+# What is this tool for?
 
 Say you are working on a project that involves processing a number of
 comma separated or tab serparated files. Assuming, you are using
@@ -29,17 +27,19 @@ infers some basic data types for each column and automatically created
 a ```Record``` data type using ```Template Haskell```.
 
 
-Quick Start
-============
+# Quick Start
 
-Example 1
-----------
+## Example 1 :
 
 Using data/salaries.csv
 
 NAME,SALARY,STATUS
 John Doe,100.0,True
-Jill Jill,200,False
+Jill Doe, 200.10,False
+John Doe Sr,101.0,T
+Jill Doe Sr, 10101.10,f
+John Doe Jr,1010101.0,true
+Jill Doe Jr, 10101.10,false
 
 ``` haskell
 
@@ -71,9 +71,8 @@ If you load this code in ```GHCi```, we will see
 ``` haskell
 1 >:info Salaries
 data Salaries
-  = Salaries {_name :: Text,
-              _salary :: Double,
-              _status :: Bool}
+  = Salaries {_name :: Text, _salary :: Double, _status :: Bool}
+
 ```
 Note that all column names are in lower case and "_" has been prefixed
 to the column names.
@@ -102,6 +101,10 @@ instance ToNamedRecord Salaries where
 instance FromNamedRecord Salaries where
   parseNamedRecord = genericParseNamedRecord fieldModifierOptions
 
+--- This is not required. This instance is used in the example
+--- to help in formatting. Tabulate available in pptable package
+instance T.Tabulate Salaries
+
 --- Now load the data
 
 loadData fname = do
@@ -116,20 +119,20 @@ main = do
   putStrLn . show $ v
 ```
 
-In ```GHCi``` we see (formatted/truncated for clarity)
+In ```GHCi``` we see (formatted for clarity)
 
 ``` haskell
 15 >loadData "data/salaries.csv"
-[Salaries {_name = "John Doe", _salary = Just 1010101.0, _status =False},
- Salaries {_name = "Jill Jill", _salary = Just 10101.1, _status=False},
- Salaries {_name = "John Doe1", _salary = Just 1010101.0,_status=True}
- .
- .
- ]
+1 >loadData "data/salaries.csv"
+[Salaries {_name = "John Doe", _salary = 100.0, _status = False},
+ Salaries {_name = "Jill Doe", _salary = 200.1, _status =False},
+ Salaries {_name = "John Doe Sr", _salary = 101.0, _status =True},
+ Salaries {_name = "Jill Doe Sr", _salary = 10101.1, _status =False},
+ Salaries {_name = "John Doe Jr", _salary = 1010101.0, _status=False},
+ Salaries {_name = "Jill Doe Jr", _salary = 10101.1, _status= False}]
 ```
 
-Caveats
-=======
+# Caveats (Or list of future enhancements)
 
 1. The columns names along with prefix should be valid Haskell field
    names. For example, column names cannot have spaces or other
@@ -144,3 +147,6 @@ Caveats
    variants of those.
 4. Mixed case column headers not automatically supported. A more
    complex form of ```fieldOptionModifiers``` needs to be provided.
+5. All numeric value column are inferred as ```Double```. That is
+   possiblity of an ```Int``` type is ignored.
+6. No way to provide custom types.

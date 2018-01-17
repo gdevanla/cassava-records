@@ -1,6 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+
+
 -- Documentation
 -- Cleanup import creation
 --
@@ -32,6 +34,7 @@ import qualified Data.Char as DC
 import GHC.Generics (Generic)
 import Data.Text as DT
 import qualified Data.Text.Encoding as DTE
+import Data.Data
 
 
 makeField:: BC.ByteString -> Type -> String -> (Name, Bang, Type)
@@ -50,7 +53,7 @@ makeRecord :: String -> [(Name, Bang, Type)] -> DecsQ
 makeRecord record_name fields = do
   let record_name' =  mkName record_name
       recc = RecC (record_name') fields
-      deriv =  [DerivClause Nothing [ConT ''Show, ConT ''Generic]]
+      deriv =  [DerivClause Nothing [ConT ''Show, ConT ''Generic, ConT ''Data]]
       r = DataD [] (record_name') [] Nothing [recc] deriv
   return [r]
 

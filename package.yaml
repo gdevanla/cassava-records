@@ -45,6 +45,7 @@ executables:
     dependencies:
     - cassava-records
     - lens
+    - pptable
 
 tests:
   cassava-records-test:

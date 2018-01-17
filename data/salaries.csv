@@ -1,9 +1,7 @@
-name,salary,status
-John Doe,1010101.0,True
-Jill Jill, 10101.10,False
-John Doe1,1010101.0,T
-Jill Jill1, 10101.10,F
-John1 Doe,1010101.0,true
-Jill1 Jill, 10101.10,false
-John2 Doe1,1010101.0,t
-Jill2 Jill1, 10101.10,f
+NAME,SALARY,STATUS
+John Doe,100.0,True
+Jill Doe, 200.10,False
+John Doe Sr,101.0,T
+Jill Doe Sr, 10101.10,f
+John Doe Jr,1010101.0,true
+Jill Doe Jr, 10101.10,false
