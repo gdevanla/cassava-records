@@ -103,12 +103,7 @@ instance ToNamedRecord Salaries where
 instance FromNamedRecord Salaries where
   parseNamedRecord = genericParseNamedRecord fieldModifierOptions
 
---- This is not required. This instance is used in the example
---- to help in formatting. Tabulate available in pptable package
-instance T.Tabulate Salaries
-
 --- Now load the data
-
 loadData fname = do
   csvData <- BL.readFile fname
   case decodeByName csvData of
@@ -132,6 +127,38 @@ In ```GHCi``` we see (formatted for clarity)
  Salaries {_name = "Jill Doe Sr", _salary = 10101.1, _status =False},
  Salaries {_name = "John Doe Jr", _salary = 1010101.0, _status=False},
  Salaries {_name = "Jill Doe Jr", _salary = 10101.1, _status= False}]
+```
+
+Note, the type inference in the above example is as follows:
+
+1. If a column has values from the set {```true```, ```t```, ```false```, ```f```}
+   (ignoring case) then the inferred type is ```Bool```.
+2. If a column has values that are all numeric, then the inferred type as a ```Double```
+3. For all other cases, a ```Text``` type is inferred.
+
+# Example 2 (Missing Values)
+
+The library also supports type inference when values are missing. For example in,
+
+```
+NAME,SALARY,STATUS
+John Doe,100.0,True
+Jill Doe,200.10,False
+John Doe Sr,101.0,T
+Jill Doe Sr,,f
+John Doe Jr,1010101.0,
+Jill Doe Jr,10101.10,false
+```
+
+the ```status``` for John Doe Jr is missing and the ```salary``` for
+Jill Doe Sr is missing. In this case, the type as wrapped in a ```Maybe``` type.
+
+In that case, the record instance we get will be as follows:
+
+``` haskell
+1 >:info Salaries
+data Salaries
+  = Salaries {_name :: Text, _salary :: Maybe Double, _status :: Maybe Bool}
 ```
 
 # Caveats (Or list of future enhancements)
