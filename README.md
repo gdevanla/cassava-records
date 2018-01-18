@@ -97,6 +97,8 @@ fieldModifierOptions = defaultOptions { fieldLabelModifier = rmUnderscore }
     rmUnderscore ('_':str) = DT.unpack . DT.toUpper . DT.pack $ str
     rmUnderscore str = str
 
+-- the ToNamedRecord and FromNamedRecord are needed by Cassava since
+-- we prefix
 instance ToNamedRecord Salaries where
   toNamedRecord = genericToNamedRecord fieldModifierOptions
 
@@ -119,8 +121,7 @@ main = do
 In ```GHCi``` we see (formatted for clarity)
 
 ``` haskell
-15 >loadData "data/salaries.csv"
-1 >loadData "data/salaries.csv"
+2 >loadData "data/salaries.csv"
 [Salaries {_name = "John Doe", _salary = 100.0, _status = False},
  Salaries {_name = "Jill Doe", _salary = 200.1, _status =False},
  Salaries {_name = "John Doe Sr", _salary = 101.0, _status =True},
@@ -156,7 +157,7 @@ Jill Doe Sr is missing. In this case, the type as wrapped in a ```Maybe``` type.
 In that case, the record instance we get will be as follows:
 
 ``` haskell
-1 >:info Salaries
+3 >:info Salaries
 data Salaries
   = Salaries {_name :: Text, _salary :: Maybe Double, _status :: Maybe Bool}
 ```
@@ -176,6 +177,4 @@ data Salaries
    variants of those.
 4. Mixed case column headers not automatically supported. A more
    complex form of ```fieldOptionModifiers``` needs to be provided.
-5. All numeric value column are inferred as ```Double```. That is
-   possiblity of an ```Int``` type is ignored.
-6. No way to provide custom types.
+5. No way to provide custom types.

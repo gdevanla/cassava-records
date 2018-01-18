@@ -1,16 +1,30 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+{-|
+Module      : Records.hs
+Description : Using Template Haskell this module auto create Record
+              types by inferring types from the provided csv or tab separated file.
+Copyright   : (c) Guru Devanla 2018
+License     : MIT
+Maintainer  : grdvnl@gmail.com
+Stability   : experimental
 
 
--- Documentation
--- Cleanup import creation
---
+This module provides an easy way to explore input files that may have numerous columns
+by helping create a Record types by guessing the types. That information can be used
+as is or persisted to a file so that other customizations can be performed.
+-}
 
 module Data.Cassava.Records
   (
+    -- ** Creating Record types
+    -- $makeCsvRecord
     makeCsvRecord
+    -- $commaOptions
   , commaOptions
+    -- $tabOptions
+  , tabOptions
   )
 where
 
@@ -36,7 +50,9 @@ import Data.Text as DT
 import qualified Data.Text.Encoding as DTE
 import Data.Data
 
-
+{-| Create a field name and type tuple that will be used with RecC to
+create a Record.
+-}
 makeField:: BC.ByteString -> Type -> String -> (Name, Bang, Type)
 makeField fname ftype prefix = (
   mkName (fname'), defaultBang , ftype)
@@ -44,11 +60,13 @@ makeField fname ftype prefix = (
   defaultBang = Bang NoSourceUnpackedness NoSourceStrictness
   fname' = prefix ++ (DT.unpack $ DT.toLower $ DTE.decodeUtf8 $ fname)
 
+-- Create the list of fields that will form a Record
 makeFields:: V.Vector (BC.ByteString, Type) -> String -> V.Vector (Name, Bang, Type)
 makeFields fnames_types suffix = V.map makeField' fnames_types
   where
     makeField' = (\(f, t) -> makeField f t suffix)
 
+-- Return the expression that contains the Record declaration
 makeRecord :: String -> [(Name, Bang, Type)] -> DecsQ
 makeRecord record_name fields = do
   let record_name' =  mkName record_name
@@ -57,6 +75,7 @@ makeRecord record_name fields = do
       r = DataD [] (record_name') [] Nothing [recc] deriv
   return [r]
 
+-- Parses the file and returns the Header and Data from he input file
 createRecords ::
   BC.ByteString -> DecodeOptions -> (Header, V.Vector NamedRecord)
 createRecords csvData options =
@@ -64,31 +83,44 @@ createRecords csvData options =
       e = P.parseOnly p csvData in
     case e of
       Right f -> f
-      Left f -> fail  $ "unable to parse" ++ f
+      Left f -> fail $ "unable to parse" ++ f
 
+-- Infer the type for the given column
 inferColumnType :: BL.ByteString -> V.Vector BC.ByteString -> (BC.ByteString, Type)
 inferColumnType header column = (header, inferMajorityType column)
 
+-- Check to see if that numeric value can be an Integer
 isInteger s = case reads s :: [(Integer, String)] of
     [(_, "")] -> True
     _         -> False
 
+-- Check to see if the value can be a Double
 isDouble s = case reads s :: [(Double, String)] of
     [(_, "")] -> True
     _         -> False
 
+-- Check to see if value is Numeric
 isNumeric :: String -> Bool
 isNumeric s = isInteger s || isDouble s
 
+-- Check to see if value can be a Bool
 isBool :: String -> Bool
 isBool c = let x = fmap DC.toLower c
   in
   x == "t" || x == "f" ||  x == "true" || x == "false"
 
+{-|
+Instances to support conversion to Bool type. Cassava currently does not
+provide an instance for Bool.
+-}
 instance ToField Bool where
   toField True = "True"
   toField False = "False"
 
+{-|
+Instances to support creation of Bool type fields. Cassava currently does not
+provide an instance for Bool.
+-}
 instance FromField Bool where
   parseField field = do
     let s' = DT.toLower . DTE.decodeUtf8 $ field
@@ -107,11 +139,14 @@ inferMajorityType column =
     types' = V.filter (\t -> t /= ''Empty) types
     non_types' = V.filter (\t -> t == ''Empty) types
     find_types c
-      | isNumeric (DT.unpack . DTE.decodeUtf8 $ c) = ''Double
+      | isInteger (DT.unpack . DTE.decodeUtf8 $ c) = ''Integer
+      | isDouble (DT.unpack . DTE.decodeUtf8 $ c) = ''Double
       | isBool (DT.unpack . DTE.decodeUtf8 $ c)  = ''Bool
       | c == "" = ''Empty
       | otherwise = ''Text
     majority_types t1
+      | (V.all (\t -> t == ''Integer) t1) && V.length non_types' > 0 = maybeType ''Integer
+      | V.all (\t -> t == ''Integer) t1 = ConT ''Integer
       | (V.all (\t -> t == ''Double) t1) && V.length non_types' > 0 = maybeType ''Double
       | V.all (\t -> t == ''Double) t1 = ConT ''Double
       | (V.all (\t -> t == ''Bool) t1) && V.length non_types' > 0 = maybeType ''Bool
@@ -132,11 +167,17 @@ inferTypes headers named_records suffix =
   in
     fieldnames_types
 
+-- $tabOptions
+{-| Provides a default 'DecodeOptions' for tab separated input files
+-}
 tabOptions :: DecodeOptions
 tabOptions = defaultDecodeOptions {
   decDelimiter = fromIntegral (DC.ord '\t')
   }
 
+-- $commaOptions
+{-| Provides a default 'DecodeOptions' for comma separated input files
+-}
 commaOptions :: DecodeOptions
 commaOptions = defaultDecodeOptions
 
@@ -157,8 +198,15 @@ makeInstance recordName = [d|
         headerOrder = genericHeaderOrder $ defaultFieldNameOptions
    |]
 
-makeCsvRecord ::
-  String -> FilePath -> String -> DecodeOptions -> Q [Dec]
+-- $makeCsvRecord
+{-|
+Makes the Record that reflects the types inferred from the input file.
+-}
+makeCsvRecord :: String -- ^ Name to use for the Record type being created
+              -> FilePath  -- ^ File path of input file
+              -> String -- ^ Prefix to be used to field names. Recommended to use "_" to work well with Lens
+              -> DecodeOptions -- ^ 'DecodeOptions' as required by Cassava to read the input file
+              -> Q [Dec]
 makeCsvRecord recordName fileName prefix decodeOptions = do
   csvData <- runIO $ BL.readFile fileName
   let (headers, named_records) = createRecords csvData decodeOptions
