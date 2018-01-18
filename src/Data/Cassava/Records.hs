@@ -144,11 +144,12 @@ inferMajorityType column =
       | isBool (DT.unpack . DTE.decodeUtf8 $ c)  = ''Bool
       | c == "" = ''Empty
       | otherwise = ''Text
+    doubleOrInteger t = t == ''Double || t == ''Integer
     majority_types t1
       | (V.all (\t -> t == ''Integer) t1) && V.length non_types' > 0 = maybeType ''Integer
       | V.all (\t -> t == ''Integer) t1 = ConT ''Integer
-      | (V.all (\t -> t == ''Double) t1) && V.length non_types' > 0 = maybeType ''Double
-      | V.all (\t -> t == ''Double) t1 = ConT ''Double
+      | (V.all doubleOrInteger t1) && V.length non_types' > 0 = maybeType ''Double
+      | V.all doubleOrInteger t1 = ConT ''Double
       | (V.all (\t -> t == ''Bool) t1) && V.length non_types' > 0 = maybeType ''Bool
       | V.all (\t -> t == ''Bool) t1 = ConT ''Bool
       | V.length non_types' > 0 = maybeType ''Text
