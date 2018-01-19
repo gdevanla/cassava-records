@@ -57,3 +57,10 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - cassava-records
+    - tasty
+    - HUnit
+    - QuickCheck
+    - tasty-hunit
+    - tasty-quickcheck
+    - containers
+    - vector

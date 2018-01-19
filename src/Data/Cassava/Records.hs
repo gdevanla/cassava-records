@@ -62,15 +62,15 @@ makeField fname ftype prefix = (
 
 -- Create the list of fields that will form a Record
 makeFields:: V.Vector (BC.ByteString, Type) -> String -> V.Vector (Name, Bang, Type)
-makeFields fnames_types suffix = V.map makeField' fnames_types
+makeFields fnames_types prefix = V.map makeField' fnames_types
   where
-    makeField' = (\(f, t) -> makeField f t suffix)
+    makeField' = (\(f, t) -> makeField f t prefix)
 
 -- Return the expression that contains the Record declaration
-makeRecord :: String -> [(Name, Bang, Type)] -> DecsQ
+makeRecord :: String -> V.Vector (Name, Bang, Type) -> DecsQ
 makeRecord record_name fields = do
   let record_name' =  mkName record_name
-      recc = RecC (record_name') fields
+      recc = RecC (record_name') $ V.toList fields
       deriv =  [DerivClause Nothing [ConT ''Show, ConT ''Generic, ConT ''Data]]
       r = DataD [] (record_name') [] Nothing [recc] deriv
   return [r]
@@ -211,11 +211,11 @@ makeCsvRecord :: String -- ^ Name to use for the Record type being created
 makeCsvRecord recordName fileName prefix decodeOptions = do
   csvData <- runIO $ BL.readFile fileName
   let (headers, named_records) = createRecords csvData decodeOptions
-  makeRecord recordName (V.toList $ inferTypes headers named_records prefix)
+  makeRecord recordName (inferTypes headers named_records prefix)
 
 
-loadData fname = do
-  csvData <- BLZ.readFile fname
-  case decodeByName csvData of
-    Left err -> fail ("Faled to load" Prelude.++ err)
-    Right (_, v) -> return v
+-- loadData fname = do
+--   csvData <- BLZ.readFile fname
+--   case decodeByName csvData of
+--     Left err -> fail ("Faled to load" Prelude.++ err)
+--     Right (_, v) -> return v
