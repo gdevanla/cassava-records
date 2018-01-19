@@ -11,6 +11,7 @@ import Language.Haskell.TH
 import Data.Text as DT
 
 import Data.Cassava.Records
+import Data.Cassava.Internal.RecordBuilder
 
 
 -- expectedRecord record_name name_type = RecC (record_name') fields
@@ -34,7 +35,8 @@ testSimple = testCase "testSimpleInput"
       let expected = makeRecord record_name $ makeFields expected_types "_"
       let qdec = makeCsvRecord record_name "test/data/salaries_simple.csv" "_" commaOptions
       dec <- runQ qdec
-      assertEqual "Test Simple" (Prelude.head dec) expected
+      expected_dec <- (runQ expected)
+      assertEqual "Test Simple" (Prelude.head dec) (Prelude.head expected_dec)
       --   DataD _ name _ _ con derive_clause -> check name con derive
       --   _ -> assertFailure "type not supported"
       -- let check_name exp actual = assertEqual "check name" exp actual

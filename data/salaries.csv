@@ -1,4 +1,4 @@
-NAME,SALARY,STATUS,AGE
+name,salary,status,age
 John Doe,100.0,True,1
 Jill Doe, 200.10,False,2
 John Doe Sr,101.0,T,3

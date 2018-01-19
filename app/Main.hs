@@ -15,8 +15,8 @@ import qualified Text.PrettyPrint.Tabulate as T
 import Language.Haskell.TH
 -- import Control.Lens hiding (element)
 
--- $(makeCsvRecord "Salaries" "data/salaries.csv" "_" commaOptions)
--- $(makeInstance "Salaries")
+$(makeCsvRecord "Salaries" "data/salaries.csv" "_" commaOptions)
+$(makeInstance "Salaries")
 
 -- $(makeCsvRecord "Sec" "SEC_20170802.csv" "_" commaOptions)
 -- $(makeCsvRecord "NewR" "SEC_20170802_10.txt" "_tsv" tabOptions)
