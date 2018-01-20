@@ -31,7 +31,7 @@ a ```Record``` data type using ```Template Haskell```.
 
 ## Example 1 :
 
-Using data/salaries.csv
+Using data/salaries_simple.csv
 
 ```
 emp_no,name,salary,status,years
@@ -144,7 +144,7 @@ Note, the type inference in the above example is as follows:
 
 # Example 2 (Missing Values)
 
-The library also supports type inference when values are missing. For example in,
+The library also supports type inference when values are missing. For example in, data/salaries_mixed_input.csv
 
 ```
 emp_no,name,salary,status,years
@@ -234,7 +234,8 @@ $(makeCsvRecord "Salaries" "data/salaries_simple.csv" "_" commaOptions)
 $(makeCsvRecord "SalariesMixed" "data/salaries_mixed_input.csv" "_" commaOptions)
 $(makeInstance "SalariesMixed")
 
--- the following instance is not required, if $(makeInstance) call is spliced in
+-- the following instance is not required, if $(makeInstance Salaries) statement
+-- is spliced in (currently commented in the example)
 myOptions :: Options
 myOptions = defaultOptions { fieldLabelModifier = rmUnderscore }
   where
@@ -268,8 +269,8 @@ main = do
    created slice into a file is recommended. In the future, the
    makeCsvRecord function can take a parameter to specify the minimum
    number of rows that can be used to infer the types.
-3. Supported types are limited. Text, Bool, Double and the MayBe
+3. Supported types are limited. Text, Bool, Integer, Double and the MayBe
    variants of those.
 4. Mixed case column headers not automatically supported. A more
    complex form of ```fieldOptionModifiers``` needs to be provided.
-5. No way to provide custom types.
+5. Currently no options to provide custom types.
