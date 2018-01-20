@@ -194,7 +194,7 @@ main = do
   v <- loadData "data/salaries_mixed_input.csv":: IO (V.Vector SalariesMixed)
   putStrLn . show $ v
 
-  ```
+```
 
 The output will be as follows:
 
@@ -205,7 +205,6 @@ The output will be as follows:
  SalariesMixed {_emp_no = 4, _name = Just "Jill Doe Sr", _salary = Just 10101.1, _status = Nothing, _years = Just 4.2},
  SalariesMixed {_emp_no = 5, _name = Just "John Doe Jr", _salary = Nothing, _status = Just False, _years = Just 5.1},
  SalariesMixed {_emp_no = 6, _name = Nothing, _salary = Just 10101.1, _status = Just False, _years = Just 6.0}]
-
 ```
 
 Here is a full working code that uses both the examples:
