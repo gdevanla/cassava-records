@@ -262,17 +262,17 @@ main = do
 
 # Caveats (Or list of future enhancements)
 
-1. The columns names along with prefix should be valid Haskell field
+1. The columns names along with prefix("_") should be a valid Haskell field
    names. For example, column names cannot have spaces or other
-   characters not supported by ```field``` names are not supported.
+   characters not supported for use as ```field``` names of ```Record``` data type.
 2. The library loads the whole file during compilation to infer
    types. Given the size of the file, this will increase the compile
    time. Alternative workflows, like stripping the file or dumping the
    created slice into a file is recommended. In the future, the
-   makeCsvRecord function can take a parameter to specify the minimum
+   makeCsvRecord function can take a parameter to specify the max
    number of rows that can be used to infer the types.
-3. Supported types are limited. Text, Bool, Integer, Double and the MayBe
-   variants of those.
+3. The inferred types are limited. Text, Bool, Integer, Double and the MayBe
+   variants of those. Future, support may include DateTime.
 4. Mixed case column headers not automatically supported. A more
    complex form of ```fieldOptionModifiers``` needs to be provided.
-5. Currently no options to provide custom types.
+5. Currently there is no option to provide custom types.
