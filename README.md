@@ -62,7 +62,7 @@ $(makeCsvRecord "Salaries" "data/salaries_simple.csv" "_" commaOptions)
 
 ```
 
-The ```makeCsvRecord``` needs take 4 arguments,
+The ```makeCsvRecord``` function take 4 arguments,
 
 1. ```"Salaries"``` :  A ```String``` that will be used as name for
    the ```Record```.
