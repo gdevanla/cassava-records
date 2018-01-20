@@ -1,7 +1,8 @@
 # cassava-records
 
-A library extension for Cassava (Haskell CSV parser library) that
-automatically creates a Record given the csv file.
+A library extension for ```cassava``` (Haskell CSV parser library) that
+automatically creates a Record data type given an columnar input file. eg
+a CSV file.
 
 # What is this tool for?
 
@@ -10,21 +11,23 @@ comma separated or tab serparated files. Assuming, you are using
 cassava for loading the input files, here is a typical workflow you
 would follow
 
-a. Inspect the file
-b. Create a ```Record``` data type to reflect the columns and types
-found in the file
-c. Create instances of the Record type that may be required to load
-the files with Cassava.
+a. Inspect the file that contains ```Salaries``` of ```Employees```.
+
+b. Create a ```Record``` data type called ```Salaries``` to reflect 
+the columns and types found in the file
+
+c. Create required instances of the ```Salaries``` data type that may be 
+required to load the files with ```cassava```.
 
 Now, imagine this file you are inspecting to contains tens or hundreds
 of columns. Now, as a good Haskeller you will want to automate steps
 (a) and (b) to the extend possible. That is precisely, what this
 library does.
 
-Cassava-records performs the following tasks. Given, a input file
+```cassava-records``` performs the following tasks. Given, a input file
 (command or tab-seperated for example), it reads the whole file,
-infers some basic data types for each column and automatically created
-a ```Record``` data type using ```Template Haskell```.
+infers some basic data types for each column and automatically creates
+a ```Record``` of inferred data types using ```Template Haskell```.
 
 
 # Quick Start
