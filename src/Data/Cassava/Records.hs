@@ -91,11 +91,11 @@ makeInstance :: String -- ^ name of record for which the instance needs to be cr
              -> DecsQ
 makeInstance recordName = [d|
    instance ToNamedRecord $(conT (mkName recordName)) where
-        toNamedRecord = genericToNamedRecord $ defaultFieldNameOptions
+        toNamedRecord = genericToNamedRecord defaultFieldNameOptions
    instance FromNamedRecord $(conT (mkName recordName)) where
-        parseNamedRecord = genericParseNamedRecord $ defaultFieldNameOptions
+        parseNamedRecord = genericParseNamedRecord defaultFieldNameOptions
    instance DefaultOrdered $(conT (mkName recordName)) where
-        headerOrder = genericHeaderOrder $ defaultFieldNameOptions
+        headerOrder = genericHeaderOrder defaultFieldNameOptions
    |]
 
 

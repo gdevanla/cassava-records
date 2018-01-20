@@ -45,24 +45,24 @@ create a Record.
 -}
 makeField:: BC.ByteString -> Type -> String -> (Name, Bang, Type)
 makeField fname ftype prefix = (
-  mkName (fname'), defaultBang , ftype)
+  mkName fname'n, defaultBang , ftype)
   where
   defaultBang = Bang NoSourceUnpackedness NoSourceStrictness
-  fname' = prefix ++ (DT.unpack $ DT.toLower $ DTE.decodeUtf8 $ fname)
+  fname' = prefix ++ DT.unpack (DT.toLower $ DTE.decodeUtf8 fname)
 
 -- Create the list of fields that will form a Record
 makeFields:: V.Vector (BC.ByteString, Type) -> String -> V.Vector (Name, Bang, Type)
 makeFields fnames_types prefix = V.map makeField' fnames_types
   where
-    makeField' = (\(f, t) -> makeField f t prefix)
+    makeField' (f, t) = makeField f t prefix
 
 -- Return the expression that contains the Record declaration
 makeRecord :: String -> V.Vector (Name, Bang, Type) -> DecsQ
 makeRecord record_name fields = do
   let record_name' =  mkName record_name
-      recc = RecC (record_name') $ V.toList fields
+      recc = RecC record_name' $ V.toList fields
       deriv =  [DerivClause Nothing [ConT ''Show, ConT ''Generic, ConT ''Data]]
-      r = DataD [] (record_name') [] Nothing [recc] deriv
+      r = DataD [] record_name' [] Nothing [recc] deriv
   return [r]
 
 -- Parses the file and returns the Header and Data from he input file
@@ -136,24 +136,22 @@ inferMajorityType column =
       | otherwise = ''Text
     doubleOrInteger t = t == ''Double || t == ''Integer
     majority_types t1
-      | (V.all (\t -> t == ''Integer) t1) && V.length non_types' > 0 = maybeType ''Integer
+      | V.all (\t -> t == ''Integer) t1 && V.length non_types' > 0 = maybeType ''Integer
       | V.all (\t -> t == ''Integer) t1 = ConT ''Integer
-      | (V.all doubleOrInteger t1) && V.length non_types' > 0 = maybeType ''Double
+      | V.all doubleOrInteger t1 && V.length non_types' > 0 = maybeType ''Double
       | V.all doubleOrInteger t1 = ConT ''Double
-      | (V.all (\t -> t == ''Bool) t1) && V.length non_types' > 0 = maybeType ''Bool
+      | V.all (\t -> t == ''Bool) t1 && V.length non_types' > 0 = maybeType ''Bool
       | V.all (\t -> t == ''Bool) t1 = ConT ''Bool
       | V.length non_types' > 0 = maybeType ''Text
       | otherwise = ConT ''Text
 
 
 collectColumns :: BL.ByteString -> V.Vector NamedRecord -> V.Vector BC.ByteString
-collectColumns header named_records =
-  V.map fn named_records where
-  fn r = r ! header
+collectColumns header =  V.map (! header)
 
 inferTypes :: Header -> V.Vector NamedRecord -> String -> V.Vector (Name, Bang, Type)
 inferTypes headers named_records suffix =
-  let columns = V.map (flip collectColumns named_records) headers
+  let columns = V.map (`collectColumns` named_records) headers
       fieldnames_types = makeFields (V.zipWith inferColumnType headers columns) suffix
   in
     fieldnames_types
