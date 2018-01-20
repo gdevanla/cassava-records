@@ -45,7 +45,7 @@ create a Record.
 -}
 makeField:: BC.ByteString -> Type -> String -> (Name, Bang, Type)
 makeField fname ftype prefix = (
-  mkName fname'n, defaultBang , ftype)
+  mkName fname', defaultBang , ftype)
   where
   defaultBang = Bang NoSourceUnpackedness NoSourceStrictness
   fname' = prefix ++ DT.unpack (DT.toLower $ DTE.decodeUtf8 fname)

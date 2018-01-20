@@ -11,13 +11,20 @@ extra-source-files:
 - ChangeLog.md
 
 # Metadata used when publishing your package
-synopsis:            Auto-generation of records data type using the data in the provided csv or tab separated file.
-# category:            Web
+synopsis:            Auto-generation of records data type.
+category:            Text, Web, CSV
 
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on Github at <https://github.com/githubuser/cassava-records#readme>
+description: cassava-records library helps in auto-creating record
+             data types using Template Haskell by inferring types from the columns
+             of a csv or compatible input file. The record and type classes
+             instances generated can be seamlessly used with cassava(the haskell csv reader library) to load the
+             data into these record types without dealing with any other level of
+             abstraction.
+
+             Please see README on Github at <https://github.com/gdevanla/cassava-records#readme>
 
 dependencies:
 - base >= 4.7 && < 5

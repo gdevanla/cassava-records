@@ -34,13 +34,14 @@ a ```Record``` data type using ```Template Haskell```.
 Using data/salaries.csv
 
 ```
-NAME,SALARY,STATUS
-John Doe,100.0,True
-Jill Doe,200.10,False
-John Doe Sr,101.0,T
-Jill Doe Sr,10101.10,f
-John Doe Jr,1010101.0,true
-Jill Doe Jr,10101.10,false
+emp_no,name,salary,status,years
+1,John Doe,100.0,True,1
+2,Jill Doe, 200.10,False,2
+3,John Doe Sr,101.0,T,3
+4,Jill Doe Sr, 10101.10,f,4.2
+5,John Doe Jr,1010101.0,true,5.1
+6,Jill Doe Jr, 10101.10,false,6
+
 ```
 
 ``` haskell
@@ -54,7 +55,7 @@ import qualified Data.ByteString.Lazy as BL
 import Data.Vector as V
 import Data.Text as DT
 
-$(makeCsvRecord "Salaries" "data/salaries.csv" "_" commaOptions)
+$(makeCsvRecord "Salaries" "data/salaries_simple.csv" "_" commaOptions)
 
 ```
 
@@ -62,7 +63,7 @@ The ```makeCsvRecord``` needs take 4 arguments,
 
 1. ```"Salaries"``` :  A ```String``` that will be used as name for
    the ```Record```.
-2. ```data/salaries.csv```: path to the input file
+2. ```data/salaries_simple.csv```: path to the input file
 3. ```"_"```: string to prefix each field. Useful, if we need to build lens
 for this record
 4. ```commaOptions```: ```defaultDecodeOptions``` defined
@@ -73,7 +74,12 @@ If you load this code in ```GHCi```, we will see
 ``` haskell
 1 >:info Salaries
 data Salaries
-  = Salaries {_name :: Text, _salary :: Double, _status :: Bool}
+  = Salaries {
+    _emp_no:: Integer,
+    _name :: Text,
+    _salary :: Double,
+    _status :: Bool,
+    _years:: Double}
 
 ```
 Note that all column names are in lower case and "_" has been prefixed
@@ -88,6 +94,10 @@ and ```FromNamedRecord``` instances for ```cassava```.
 Note, that if the column headers are mixed case, it become
 tricky. Current version of the library does not work very well with
 mixed case column headers.
+
+There is a convenience method called ```makeInstances``` that can create
+the instances required for ```cassava```.The instances created use the
+default ```fieldModifieroptions``` settings shown below.
 
 ``` haskell
 
@@ -105,16 +115,9 @@ instance ToNamedRecord Salaries where
 instance FromNamedRecord Salaries where
   parseNamedRecord = genericParseNamedRecord fieldModifierOptions
 
---- Now load the data
-loadData fname = do
-  csvData <- BL.readFile fname
-  case decodeByName csvData of
-    Left err -> fail ("Failed to load" Prelude.++ err)
-    Right (_, v::V.Vector Salaries) -> return v
-
 main :: IO ()
 main = do
-  v <- loadData "data/salaries.csv"
+  v <- loadData "data/salaries_simple.csv":: IO (V.Vector Salaries)
   putStrLn . show $ v
 ```
 
@@ -122,19 +125,21 @@ In ```GHCi``` we see (formatted for clarity)
 
 ``` haskell
 2 >loadData "data/salaries.csv"
-[Salaries {_name = "John Doe", _salary = 100.0, _status = False},
- Salaries {_name = "Jill Doe", _salary = 200.1, _status =False},
- Salaries {_name = "John Doe Sr", _salary = 101.0, _status =True},
- Salaries {_name = "Jill Doe Sr", _salary = 10101.1, _status =False},
- Salaries {_name = "John Doe Jr", _salary = 1010101.0, _status=False},
- Salaries {_name = "Jill Doe Jr", _salary = 10101.1, _status= False}]
+[Salaries {_emp_no = 1, _name = "John Doe", _salary = 100.0, _status = False, _years = 1.0},
+ Salaries {_emp_no = 2, _name = "Jill Doe", _salary = 200.1, _status = False, _years = 2.0},
+ Salaries {_emp_no = 3, _name = "John Doe Sr", _salary = 101.0, _status = True, _years = 3.0},
+ Salaries {_emp_no = 4, _name = "Jill Doe Sr", _salary = 10101.1, _status = False, _years = 4.2},
+ Salaries {_emp_no = 5, _name = "John Doe Jr", _salary = 1010101.0, _status = False, _years = 5.1},
+ Salaries {_emp_no = 6, _name = "Jill Doe Jr", _salary = 10101.1, _status = False, _years = 6.0}]
 ```
 
 Note, the type inference in the above example is as follows:
 
 1. If a column has values from the set {```true```, ```t```, ```false```, ```f```}
    (ignoring case) then the inferred type is ```Bool```.
-2. If a column has values that are all numeric, then the inferred type as a ```Double```
+2. If a column has values that are all numeric, then an ```Integer```
+   type is attempted, or else a ```Double``` is infered. For example
+   for ```emp_no``` the infered type is a ```Integer``` whereas for ```years``` the type is ```Double```.
 3. For all other cases, a ```Text``` type is inferred.
 
 # Example 2 (Missing Values)
@@ -142,25 +147,115 @@ Note, the type inference in the above example is as follows:
 The library also supports type inference when values are missing. For example in,
 
 ```
-NAME,SALARY,STATUS
-John Doe,100.0,True
-Jill Doe,200.10,False
-John Doe Sr,101.0,T
-Jill Doe Sr,,f
-John Doe Jr,1010101.0,
-Jill Doe Jr,10101.10,false
+emp_no,name,salary,status,years
+1,John Doe,100.0,True,1
+2,Jill Doe, 200.10,False,2
+3,John Doe Sr,101.0,T,
+4,Jill Doe Sr,10101.10,,4.2
+5,John Doe Jr,,true,5.1
+6,, 10101.10,false,6
 ```
 
-the ```status``` for John Doe Jr is missing and the ```salary``` for
-Jill Doe Sr is missing. In this case, the type as wrapped in a ```Maybe``` type.
+the ```status``` for Jill Doe Jr is missing and the ```salary``` for
+John Doe Sr is missing. In this case, the type as wrapped in a ```Maybe``` type.
 
 In that case, the record instance we get will be as follows:
 
 ``` haskell
 3 >:info Salaries
 data Salaries
-  = Salaries {_name :: Text, _salary :: Maybe Double, _status :: Maybe Bool}
+  = Salaries {
+    _emp_no:: Integer,
+    _name :: Maybe Text,
+    _salary :: Maybe Double,
+    _status :: Maybe Bool,
+    _years:: Maybe Double}
 ```
+
+Loading this data, would produce the following output
+
+``` haskell
+{-#LANGUAGE TemplateHaskell#-}
+{-#LANGUAGE DeriveGeneric #-}
+
+import Data.Cassava.Records
+import Data.Csv
+import qualified Data.ByteString.Lazy as BL
+import Data.Vector as V
+import Data.Text as DT
+
+$(makeCsvRecord "SalariesMixed" "data/salaries_mixed_input.csv" "_" commaOptions)
+$(makeInstance "SalariesMixed")
+-- ^ note that we can use this function instead of manually defining
+-- all instances required by Cassava
+
+main :: IO ()
+main = do
+  v <- loadData "data/salaries_mixed_input.csv":: IO (V.Vector SalariesMixed)
+  putStrLn . show $ v
+
+  ```
+
+The output will be as follows:
+
+```
+[SalariesMixed {_emp_no = 1, _name = Just "John Doe", _salary = Just 100.0, _status = Just False, _years = Just 1.0},
+ SalariesMixed {_emp_no = 2, _name = Just "Jill Doe", _salary = Just 200.1, _status = Just False, _years = Just 2.0},
+ SalariesMixed {_emp_no = 3, _name = Just "John Doe Sr", _salary = Just 101.0, _status = Just True, _years = Nothing},
+ SalariesMixed {_emp_no = 4, _name = Just "Jill Doe Sr", _salary = Just 10101.1, _status = Nothing, _years = Just 4.2},
+ SalariesMixed {_emp_no = 5, _name = Just "John Doe Jr", _salary = Nothing, _status = Just False, _years = Just 5.1},
+ SalariesMixed {_emp_no = 6, _name = Nothing, _salary = Just 10101.1, _status = Just False, _years = Just 6.0}]
+
+```
+
+Here is a full working code that uses both the examples:
+
+``` haskell
+{-#LANGUAGE TemplateHaskell#-}
+{-#LANGUAGE DeriveGeneric #-}
+{-#LANGUAGE ScopedTypeVariables #-}
+{-#LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+
+module Main where
+
+import Data.Cassava.Records
+import Data.Csv
+import qualified Data.ByteString.Lazy as BL
+import Data.Vector as V
+import Data.Text as DT
+import qualified Text.PrettyPrint.Tabulate as T
+import Language.Haskell.TH
+-- import Control.Lens hiding (element)
+
+$(makeCsvRecord "Salaries" "data/salaries_simple.csv" "_" commaOptions)
+-- $(makeInstance "Salaries")
+
+$(makeCsvRecord "SalariesMixed" "data/salaries_mixed_input.csv" "_" commaOptions)
+$(makeInstance "SalariesMixed")
+
+-- the following instance is not required, if $(makeInstance) call is spliced in
+myOptions :: Options
+myOptions = defaultOptions { fieldLabelModifier = rmUnderscore }
+  where
+    rmUnderscore ('_':str) = DT.unpack . DT.toUpper . DT.pack $ str
+    rmUnderscore str = str
+
+instance ToNamedRecord Salaries where
+  toNamedRecord = genericToNamedRecord myOptions
+
+instance FromNamedRecord Salaries where
+  parseNamedRecord = genericParseNamedRecord myOptions
+
+main :: IO ()
+main = do
+  v <- loadData "data/salaries_simple.csv" :: IO (V.Vector Salaries)
+  v1 <- loadData "data/salaries_mixed_input.csv" :: IO (V.Vector SalariesMixed)
+  putStrLn . show $ v
+  putStrLn . show $ v1
+
+```
+
 
 # Caveats (Or list of future enhancements)
 
