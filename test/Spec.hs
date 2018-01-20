@@ -21,37 +21,45 @@ import Data.Cassava.Internal.RecordBuilder
 -- expectedData record_name name_type =
 --   DataD [] record_name [] Nothing expectedRecord name_type
 
-
-
 testSimple = testCase "testSimpleInput"
   (
     do
       let expected_types = V.fromList  [
+            ("emp_no", ConT ''Integer),
             ("name", ConT ''DT.Text),
             ("salary", ConT ''Double),
             ("status", ConT ''Bool),
-            ("years", ConT ''Integer)]
+            ("years", ConT ''Double)]
       let record_name = "TestSimpleR"
       let expected = makeRecord record_name $ makeFields expected_types "_"
       let qdec = makeCsvRecord record_name "test/data/salaries_simple.csv" "_" commaOptions
       dec <- runQ qdec
       expected_dec <- (runQ expected)
       assertEqual "Test Simple" (Prelude.head dec) (Prelude.head expected_dec)
-      --   DataD _ name _ _ con derive_clause -> check name con derive
-      --   _ -> assertFailure "type not supported"
-      -- let check_name exp actual = assertEqual "check name" exp actual
-      -- let check_con exp actual = assertEqual "check field types" exp actual
-      -- let check name con derive = do (
-      --                                  check_name "TestSimpleR" name
-      --                                  check_cont expected_con con
-      --                                  )
+  )
 
 
+testMixedInput = testCase "testMixedInput"
+  (
+    do
+      let expected_types = V.fromList  [
+            ("emp_no", ConT ''Integer),
+            ("name",  maybeType ''DT.Text),
+            ("salary", maybeType ''Double),
+            ("status", maybeType ''Bool),
+            ("years", maybeType ''Double)]
+      let record_name = "TestMixedR"
+      let expected = makeRecord record_name $ makeFields expected_types "_"
+      let qdec = makeCsvRecord record_name "test/data/salaries_mixed_input.csv" "_" commaOptions
+      dec <- runQ qdec
+      expected_dec <- (runQ expected)
+      assertEqual "Test Maybe Columns" (Prelude.head dec) (Prelude.head expected_dec)
   )
 
 tests :: TestTree
 tests = testGroup "Tests" [
-  testSimple
+  testSimple,
+  testMixedInput
   ]
 
 main = defaultMain tests
