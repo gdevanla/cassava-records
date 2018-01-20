@@ -1,0 +1,7 @@
+emp_no,name,salary,status,years
+1,John Doe,100.0,True,1
+2,Jill Doe, 200.10,False,2
+3,John Doe Sr,101.0,T,
+4,Jill Doe Sr, 10101.10,,4.2
+5,John Doe Jr,,true,5.1
+6,, 10101.10,false,6
