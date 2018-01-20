@@ -1,10 +1,10 @@
 name:                cassava-records
-version:             0.1.0.0
+version:             0.1.0.1
 github:              "gdevanla/cassava-records"
 license:             BSD3
 author:              "Guru Devanla"
 maintainer:          "grdvnl@gmail.com"
-copyright:           "2017 Author name here"
+copyright:           "2018 Guru Devanla"
 
 extra-source-files:
 - README.md
