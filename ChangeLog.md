@@ -1,3 +1,5 @@
 # Changelog for cassava-records
 
-## Unreleased changes
+## 0.1.0.2
+
+- Fix README.md
