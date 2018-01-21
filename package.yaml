@@ -1,5 +1,5 @@
 name:                cassava-records
-version:             0.1.0.2
+version:             0.1.0.3
 github:              "gdevanla/cassava-records"
 license:             BSD3
 author:              "Guru Devanla"
@@ -41,18 +41,18 @@ dependencies:
 library:
   source-dirs: src
 
-executables:
-  cassava-records-exe:
-    main:                Main.hs
-    source-dirs:         app
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - cassava-records
-    - lens
-    - pptable
+# executables:
+#   cassava-records-exe:
+#     main:                Main.hs
+#     source-dirs:         app
+#     ghc-options:
+#     - -threaded
+#     - -rtsopts
+#     - -with-rtsopts=-N
+#     dependencies:
+#     - cassava-records
+#     - lens
+#     - pptable
 
 tests:
   cassava-records-test:
