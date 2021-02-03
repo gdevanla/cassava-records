@@ -73,7 +73,7 @@ createRecords csvData options =
       e = P.parseOnly p csvData in
     case e of
       Right f -> f
-      Left f -> fail $ "unable to parse" ++ f
+      Left f -> error $ "unable to parse" ++ f
 
 -- Infer the type for the given column
 inferColumnType :: BL.ByteString -> V.Vector BC.ByteString -> (BC.ByteString, Type)
